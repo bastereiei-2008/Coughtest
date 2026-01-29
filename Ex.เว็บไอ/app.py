@@ -251,6 +251,6 @@ elif st.session_state.page == 4:
     st.write("---")
     c1, c2 = st.columns(2)
     with c1: st.button("🏠 กลับหน้าหลัก", on_click=reset)
-    with c2: st.button("🖨️ พิมพ์ผลลัพธ์ (Simulation)", disabled=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
