@@ -1,211 +1,280 @@
 import streamlit as st
 import time
-import random
 
-# --- ตั้งค่าหน้าเว็บ ---
+# --- 1. ตั้งค่าหน้าเว็บ (Page Config) ---
 st.set_page_config(
-    page_title="Cough AI Prototype",
+    page_title="Smart Cough Screening",
     page_icon="🩺",
-    layout="centered"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- CSS ตกแต่งให้ดูเหมือนแอปมือถือ ---
-st.markdown("""
+# --- 2. จัดการ State และตัวแปร ---
+if 'page' not in st.session_state: st.session_state.page = 1
+if 'symptoms' not in st.session_state: st.session_state.symptoms = []
+if 'duration' not in st.session_state: st.session_state.duration = 1
+
+# --- 3. ฟังก์ชัน CSS สำหรับ Theme และ Card UI ---
+def inject_custom_css(dark_mode):
+    if dark_mode:
+        # Dark Mode Theme
+        bg_color = "#0E1117"
+        card_bg = "#262730"
+        text_color = "#FAFAFA"
+        secondary_text = "#A3A8B8"
+        accent_color = "#4E8CF6"
+    else:
+        # Light Mode Theme (Professional Medical)
+        bg_color = "#F0F2F6"
+        card_bg = "#FFFFFF"
+        text_color = "#31333F"
+        secondary_text = "#656875"
+        accent_color = "#007BFF"
+
+    st.markdown(f"""
     <style>
-    .stButton>button {
-        width: 100%;
-        border-radius: 20px;
-        height: 50px;
-    }
-    .big-font {
-        font-size: 20px !important;
-        font-weight: bold;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #00CC99;
-    }
+        /* พื้นหลังหลัก */
+        .stApp {{
+            background-color: {bg_color};
+            color: {text_color};
+        }}
+        
+        /* สไตล์การ์ด (Card UI) */
+        .css-card {{
+            border-radius: 15px;
+            padding: 30px;
+            background-color: {card_bg};
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }}
+        
+        /* หัวข้อ */
+        h1, h2, h3 {{
+            color: {text_color} !important;
+            font-family: 'Helvetica Neue', sans-serif;
+        }}
+        
+        /* ปุ่มกด */
+        .stButton>button {{
+            border-radius: 10px;
+            height: 3em;
+            font-weight: 600;
+            width: 100%;
+            border: none;
+            transition: all 0.3s;
+        }}
+        
+        /* Custom Highlight Text */
+        .highlight {{
+            color: {accent_color};
+            font-weight: bold;
+        }}
+        
+        /* ซ่อน Footer ของ Streamlit */
+        footer {{visibility: hidden;}}
+        
     </style>
     """, unsafe_allow_html=True)
 
-# --- Session State (ตัวช่วยจำค่าข้ามหน้า) ---
-if 'page' not in st.session_state:
-    st.session_state.page = 1
-if 'audio_data' not in st.session_state:
-    st.session_state.audio_data = None
-if 'symptoms' not in st.session_state:
-    st.session_state.symptoms = []
-if 'duration' not in st.session_state:
-    st.session_state.duration = 0
+# --- 4. Sidebar (เมนูข้าง) ---
+with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=60)
+    st.title("Smart Cough AI")
+    st.caption("v1.0.0 (Prototype)")
+    
+    st.divider()
+    
+    # ปุ่มปรับ Dark Mode
+    is_dark = st.toggle("🌙 Dark Mode", value=False)
+    inject_custom_css(is_dark)
+    
+    st.divider()
+    
+    # Progress Bar
+    steps = ["Home", "Audio Analysis", "Symptom Check", "Result"]
+    current_step = st.session_state.page - 1
+    st.write("**Current Step:**")
+    st.progress(current_step / (len(steps)-1))
+    st.caption(f"Step {st.session_state.page}: {steps[current_step]}")
 
-# --- ฟังก์ชันจำลอง AI (Mockup Model) ---
-# ทำหน้าที่คำนวณคะแนนจากอาการที่ติ๊ก เพื่อให้ผลลัพธ์ออกมาสมจริงตอนนำเสนอ
-def mock_ai_prediction(symptoms_list):
+# --- 5. Mock AI Function ---
+def mock_prediction(symptoms):
+    # Logic เดิม
     scores = {"RSV": 10, "Whooping Cough": 10, "Pneumonia": 10}
-    
-    # Logic การให้คะแนน (Rule-based)
-    # อาการของ RSV
-    if "หายใจเสียงหวีด (Wheezing)" in symptoms_list: scores["RSV"] += 40
-    if "มีไข้ต่ำๆ" in symptoms_list: scores["RSV"] += 20
-    if "น้ำมูกไหล/จาม" in symptoms_list: scores["RSV"] += 20
-    
-    # อาการของ Whooping Cough (ไอกรน)
-    if "ไอเป็นชุดยาวๆ หน้าดำหน้าแดง" in symptoms_list: scores["Whooping Cough"] += 50
-    if "หายใจเข้ามีเสียงวู๊บ (Whoop)" in symptoms_list: scores["Whooping Cough"] += 40
-    if "อาเจียนหลังไอ" in symptoms_list: scores["Whooping Cough"] += 30
-    
-    # อาการของ Pneumonia (ปอดบวม)
-    if "เจ็บหน้าอกเวลาหายใจ" in symptoms_list: scores["Pneumonia"] += 40
-    if "หายใจหอบเหนื่อย" in symptoms_list: scores["Pneumonia"] += 30
-    if "มีไข้สูง หนาวสั่น" in symptoms_list: scores["Pneumonia"] += 30
-    if "มีเสมหะสีเขียวหรือคล้ำ" in symptoms_list: scores["Pneumonia"] += 20
+    if "หายใจเสียงหวีด (Wheezing)" in symptoms: scores["RSV"] += 40
+    if "มีไข้ต่ำๆ" in symptoms: scores["RSV"] += 20
+    if "น้ำมูกไหล/จาม" in symptoms: scores["RSV"] += 20
+    if "ไอเป็นชุดยาวๆ หน้าดำหน้าแดง" in symptoms: scores["Whooping Cough"] += 50
+    if "หายใจเข้ามีเสียงวู๊บ (Whoop)" in symptoms: scores["Whooping Cough"] += 40
+    if "อาเจียนหลังไอ" in symptoms: scores["Whooping Cough"] += 30
+    if "เจ็บหน้าอกเวลาหายใจ" in symptoms: scores["Pneumonia"] += 40
+    if "หายใจหอบเหนื่อย" in symptoms: scores["Pneumonia"] += 30
+    if "มีไข้สูง หนาวสั่น" in symptoms: scores["Pneumonia"] += 30
+    if "มีเสมหะสีเขียวหรือคล้ำ" in symptoms: scores["Pneumonia"] += 20
 
-    # คืนค่าโรคที่มีคะแนนสูงสุด
-    predicted_disease = max(scores, key=scores.get)
-    confidence = min(scores[predicted_disease], 98.5) # ล็อคไว้ไม่ให้เกิน 99%
-    
-    return predicted_disease, confidence, scores
+    pred = max(scores, key=scores.get)
+    conf = min(scores[pred], 98.5)
+    return pred, conf
 
-# --- ฟังก์ชันเปลี่ยนหน้า ---
-def next_page():
-    st.session_state.page += 1
-def prev_page():
-    st.session_state.page -= 1
-def go_to_start():
+# --- 6. Navigation Functions ---
+def next_page(): st.session_state.page += 1
+def prev_page(): st.session_state.page -= 1
+def reset(): 
     st.session_state.page = 1
-    st.session_state.audio_data = None
     st.session_state.symptoms = []
+    st.session_state.duration = 1
 
 # ==========================================
-# 📄 หน้าที่ 1: คำแนะนำการใช้งาน
+# PAGE 1: Welcome & Agreement
 # ==========================================
 if st.session_state.page == 1:
-    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=100)
-    st.title("ยินดีต้อนรับสู่ Cough AI 🩺")
-    st.subheader("ระบบคัดกรองโรคทางเดินหายใจเบื้องต้น")
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.title("ระบบคัดกรองโรคทางเดินหายใจ")
+    st.markdown("### Respiratory Disease Screening System")
+    st.write("---")
     
-    st.markdown("""
-    แอปพลิเคชันนี้ใช้เทคโนโลยี AI ในการวิเคราะห์:
-    1. 🎙️ **เสียงไอ** (Cough Sound)
-    2. 🤒 **อาการร่วม** (Symptoms)
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.info("👋 **สวัสดีครับ** ระบบนี้จะช่วยประเมินความเสี่ยงเบื้องต้นจากเสียงไอและอาการร่วมของคุณ ด้วยเทคโนโลยี AI")
+        st.markdown("""
+        **โรคที่รองรับการคัดกรอง:**
+        * 🦠 **RSV** (ไวรัส RSV)
+        * 😷 **Whooping Cough** (โรคไอกรน)
+        * 🫁 **Pneumonia** (โรคปอดบวม)
+        """)
     
-    เพื่อประเมินความเสี่ยงของโรค:
-    * **RSV** (ไวรัส RSV)
-    * **Whooping Cough** (โรคไอกรน)
-    * **Pneumonia** (โรคปอดบวม)
-    """)
-    
-    st.warning("⚠️ คำเตือน: นี่เป็นเพียงแบบจำลองต้นแบบ (Prototype) ห้ามใช้อ้างอิงทางการแพทย์จริง")
-    
-    st.button("เริ่มใช้งาน ▶", on_click=next_page, type="primary")
+    with c2:
+        st.warning("**⚠️ คำเตือน (Disclaimer)**\n\nผลลัพธ์จากระบบนี้เป็นเพียงการวิเคราะห์เบื้องต้น (Prototype) ไม่สามารถใช้แทนคำวินิจฉัยของแพทย์ได้")
+        st.write("")
+        if st.button("ยอมรับและเริ่มใช้งาน ➔", type="primary"):
+            next_page()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 📄 หน้าที่ 2: อัดเสียงไอ
+# PAGE 2: Audio Recording
 # ==========================================
 elif st.session_state.page == 2:
-    st.title("🎙️ ขั้นตอนที่ 1: อัดเสียงไอ")
-    st.write("กรุณากดปุ่มเพื่ออัดเสียงไอของคุณ (ประมาณ 3-5 วินาที)")
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.subheader("🎙️ ขั้นตอนที่ 1: วิเคราะห์เสียงไอ")
+    st.caption("ระบบ AI จะทำการแยกแยะลักษณะเสียงไอ (Dry/Wet) และรูปแบบความถี่เสียง")
     
-    audio_val = st.audio_input("กดปุ่มสีแดงเพื่ออัดเสียง")
+    # พื้นที่จำลองกราฟเสียง (เพื่อความสวยงาม)
+    st.markdown("---")
     
-    if audio_val:
-        st.session_state.audio_data = audio_val
-        st.success("✅ บันทึกเสียงเรียบร้อยแล้ว")
-        st.audio(audio_val)
+    # Audio Input
+    audio = st.audio_input("กดปุ่มสีแดงเพื่อเริ่มบันทึกเสียง (3-5 วินาที)")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.button("◀ ย้อนกลับ", on_click=prev_page)
-    with col2:
-        # บังคับว่าต้องมีเสียงก่อนถึงจะไปต่อได้ (หรือกดข้ามได้ถ้าเป็น Demo)
-        if st.session_state.audio_data:
-            st.button("ถัดไป ▶", on_click=next_page, type="primary")
-        else:
-            st.button("ข้าม (Demo) ▶", on_click=next_page)
+    if audio:
+        st.success("✅ บันทึกเสียงสำเร็จ! (Audio Quality: High)")
+        st.audio(audio)
+        st.markdown("---")
+        
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            if st.button("วิเคราะห์เสียงและทำต่อ ➔", type="primary"):
+                next_page()
+    else:
+        # ปุ่มข้ามสำหรับ Demo
+        st.write("")
+        if st.button("ข้าม (ใช้เสียงจำลองสำหรับ Demo) ➔"):
+            next_page()
+            
+    st.button("🔙 ย้อนกลับ", on_click=prev_page)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 📄 หน้าที่ 3: กรอกอาการร่วม
+# PAGE 3: Symptoms
 # ==========================================
 elif st.session_state.page == 3:
-    st.title("📝 ขั้นตอนที่ 2: อาการร่วม")
-    st.write("กรุณาเลือกอาการที่คุณเป็นอยู่ (เลือกได้มากกว่า 1 ข้อ)")
-    
-    # อาการรวมมิตรของ 3 โรค
-    symptoms_options = [
-        "มีไข้ต่ำๆ",
-        "มีไข้สูง หนาวสั่น",
-        "น้ำมูกไหล/จาม",
-        "ไอเป็นชุดยาวๆ หน้าดำหน้าแดง",
-        "หายใจเสียงหวีด (Wheezing)",
-        "หายใจเข้ามีเสียงวู๊บ (Whoop)",
-        "เจ็บหน้าอกเวลาหายใจ",
-        "หายใจหอบเหนื่อย",
-        "อาเจียนหลังไอ",
-        "มีเสมหะสีเขียวหรือคล้ำ"
-    ]
-    
-    selected_symptoms = st.multiselect(
-        "เลือกอาการของคุณ:",
-        symptoms_options,
-        default=st.session_state.symptoms
-    )
-    st.session_state.symptoms = selected_symptoms
-    
-    st.write("---")
-    days = st.slider("คุณเป็นมานานกี่วันแล้ว?", 1, 30, 3)
-    st.session_state.duration = days
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.subheader("📝 ขั้นตอนที่ 2: ประเมินอาการร่วม")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.button("◀ ย้อนกลับ", on_click=prev_page)
+        st.markdown("**อาการทั่วไป (General)**")
+        s1 = st.checkbox("มีไข้ต่ำๆ")
+        s2 = st.checkbox("มีไข้สูง หนาวสั่น")
+        s3 = st.checkbox("น้ำมูกไหล / จาม")
+        s4 = st.checkbox("เจ็บหน้าอกเวลาหายใจ")
+        
     with col2:
-        st.button("🔍 ประมวลผล", on_click=next_page, type="primary")
+        st.markdown("**อาการเกี่ยวกับระบบหายใจ (Respiratory)**")
+        s5 = st.checkbox("หายใจเสียงหวีด (Wheezing)")
+        s6 = st.checkbox("หายใจเข้ามีเสียงวู๊บ (Whoop)")
+        s7 = st.checkbox("หายใจหอบเหนื่อย")
+        s8 = st.checkbox("ไอเป็นชุดยาวๆ หน้าดำหน้าแดง")
+        s9 = st.checkbox("มีเสมหะสีเขียวหรือคล้ำ")
+        s10 = st.checkbox("อาเจียนหลังไอ")
+
+    # รวบรวมอาการ
+    current_symptoms = []
+    if s1: current_symptoms.append("มีไข้ต่ำๆ")
+    if s2: current_symptoms.append("มีไข้สูง หนาวสั่น")
+    if s3: current_symptoms.append("น้ำมูกไหล/จาม")
+    if s4: current_symptoms.append("เจ็บหน้าอกเวลาหายใจ")
+    if s5: current_symptoms.append("หายใจเสียงหวีด (Wheezing)")
+    if s6: current_symptoms.append("หายใจเข้ามีเสียงวู๊บ (Whoop)")
+    if s7: current_symptoms.append("หายใจหอบเหนื่อย")
+    if s8: current_symptoms.append("ไอเป็นชุดยาวๆ หน้าดำหน้าแดง")
+    if s9: current_symptoms.append("มีเสมหะสีเขียวหรือคล้ำ")
+    if s10: current_symptoms.append("อาเจียนหลังไอ")
+    
+    st.session_state.symptoms = current_symptoms
+
+    st.write("---")
+    st.markdown("**ระยะเวลาที่เป็น (Duration)**")
+    st.session_state.duration = st.slider("จำนวนวันที่มีอาการ", 1, 30, 3, format="%d วัน")
+    
+    c1, c2 = st.columns([1, 1])
+    with c1: st.button("🔙 ย้อนกลับ", on_click=prev_page)
+    with c2: st.button("ประมวลผลการวินิจฉัย 🔍", on_click=next_page, type="primary")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 📄 หน้าที่ 4: แสดงผลและคำแนะนำ
+# PAGE 4: Result (Report Style)
 # ==========================================
 elif st.session_state.page == 4:
-    st.title("📊 ผลการวิเคราะห์")
-    
-    # Animation หลอกๆ ให้ดูเหมือน AI กำลังคิด
-    with st.spinner('AI กำลังวิเคราะห์คลื่นเสียงและอาการ...'):
-        time.sleep(2.0) # หน่วงเวลา 2 วินาที
-    
-    # เรียกใช้ Mock AI
-    disease, confidence, scores = mock_ai_prediction(st.session_state.symptoms)
-    
-    # แสดงผล
-    st.markdown(f"<h2 style='text-align: center; color: #FF4B4B;'>ความเป็นไปได้สูง: {disease}</h2>", unsafe_allow_html=True)
-    st.progress(confidence / 100)
-    st.caption(f"ความมั่นใจของโมเดล: {confidence}%")
-    
-    st.write("---")
-    
-    # ให้คำแนะนำตามโรค (Hardcoded Knowledge Base)
-    st.subheader("💡 คำแนะนำเบื้องต้น")
-    
-    if disease == "RSV":
-        st.info("""
-        **โรค RSV (Respiratory Syncytial Virus)**
-        * มักพบในเด็กเล็กและผู้สูงอายุ
-        * **การดูแล:** ดื่มน้ำมากๆ พักผ่อนให้เพียงพอ เช็ดตัวลดไข้
-        * **ควรพบแพทย์ทันที:** หากหายใจหอบแรง ปีกจมูกบาน หรือริมฝีปากเขียว
-        """)
-    elif disease == "Whooping Cough":
-        st.warning("""
-        **โรคไอกรน (Whooping Cough)**
-        * เกิดจากเชื้อแบคทีเรีย ติดต่อได้ง่าย
-        * **การดูแล:** ควรแยกผู้ป่วยเพื่อป้องกันการแพร่เชื้อ หลีกเลี่ยงสิ่งที่กระตุ้นให้ไอ
-        * **ควรพบแพทย์:** เพื่อรับยาปฏิชีวนะฆ่าเชื้อ
-        """)
-    elif disease == "Pneumonia":
-        st.error("""
-        **โรคปอดบวม/ปอดอักเสบ (Pneumonia)**
-        * เป็นภาวะติดเชื้อในปอดที่อันตราย
-        * **การดูแล:** ห้ามซื้อยากินเอง ควรได้รับวินิจฉัยจากแพทย์
-        * **ควรพบแพทย์ทันที:** นี่เป็นภาวะที่ต้องการการรักษาอย่างเร่งด่วน โดยเฉพาะหากมีไข้สูงและหอบเหนื่อย
-        """)
+    # Animation
+    with st.spinner('AI Processing... Analyzing Mel-Spectrogram & Symptoms vector...'):
+        time.sleep(1.5)
         
-    st.write("---")
-    st.caption(f"ข้อมูลประกอบ: ไอมาแล้ว {st.session_state.duration} วัน | อาการ: {', '.join(st.session_state.symptoms)}")
+    pred_disease, confidence = mock_prediction(st.session_state.symptoms)
     
-    st.button("🔄 เริ่มต้นใหม่", on_click=go_to_start)
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.title("📄 ผลการคัดกรอง (Screening Report)")
+    st.caption(f"Date: {time.strftime('%Y-%m-%d')} | AI Model v1.0")
+    st.write("---")
+    
+    # ส่วนแสดงผลลัพธ์หลัก
+    col_res1, col_res2 = st.columns([2, 1])
+    
+    with col_res1:
+        st.markdown(f"### ความเสี่ยงสูงที่จะเป็น: <span class='highlight'>{pred_disease}</span>", unsafe_allow_html=True)
+        st.write(f"จากการวิเคราะห์เสียงไอและอาการร่วมของคุณในช่วง {st.session_state.duration} วันที่ผ่านมา")
+        
+        # คำแนะนำ
+        st.info("💡 **คำแนะนำเบื้องต้น (Recommendation)**")
+        if pred_disease == "RSV":
+            st.write("- พักผ่อนให้เพียงพอ ดื่มน้ำสะอาดมากๆ")
+            st.write("- หากมีอาการหอบเหนื่อย ควรรีบพบแพทย์")
+        elif pred_disease == "Whooping Cough":
+            st.write("- ควรแยกตัวจากผู้อื่นเพื่อป้องกันการแพร่เชื้อ")
+            st.write("- ควรพบแพทย์เพื่อพิจารณาการรับยาปฏิชีวนะ")
+        else: # Pneumonia
+            st.error("⚠️ **ข้อควรระวัง:** โรคปอดบวมเป็นภาวะที่ควรได้รับการดูแลจากแพทย์ โปรดไปโรงพยาบาลเพื่อตรวจวินิจฉัยอย่างละเอียด")
+
+    with col_res2:
+        st.markdown("**AI Confidence**")
+        st.metric(label="", value=f"{confidence}%")
+        st.progress(confidence/100)
+        st.caption("ความมั่นใจของโมเดล")
+
+    st.write("---")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.button("🏠 กลับหน้าหลัก", on_click=reset)
+    with c2:
+        st.button("🖨️ พิมพ์ผลลัพธ์ (Simulation)", disabled=True)
+        
+    st.markdown('</div>', unsafe_allow_html=True)
