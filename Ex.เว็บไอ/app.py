@@ -102,7 +102,6 @@ with st.sidebar:
 def mock_prediction(symptoms):
     # Logic เดิม
     scores = {"RSV": 10, "Whooping Cough": 10, "Pneumonia": 10}
-    if "หายใจเสียงหวีด (Wheezing)" in symptoms: scores["RSV"] += 40
     if "มีไข้ต่ำๆ" in symptoms: scores["RSV"] += 20
     if "น้ำมูกไหล/จาม" in symptoms: scores["RSV"] += 20
     if "ไอเป็นชุดยาวๆ หน้าดำหน้าแดง" in symptoms: scores["Whooping Cough"] += 50
@@ -173,13 +172,7 @@ elif st.session_state.page == 2:
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
             if st.button("วิเคราะห์เสียงและทำต่อ ➔", type="primary"):
-                next_page()
-    else:
-        # ปุ่มข้ามสำหรับ Demo
-        st.write("")
-        if st.button("ข้าม (ใช้เสียงจำลองสำหรับ Demo) ➔"):
-            next_page()
-            
+                next_page()        
     st.button("🔙 ย้อนกลับ", on_click=prev_page)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -278,3 +271,4 @@ elif st.session_state.page == 4:
         st.button("🖨️ พิมพ์ผลลัพธ์ (Simulation)", disabled=True)
         
     st.markdown('</div>', unsafe_allow_html=True)
+
