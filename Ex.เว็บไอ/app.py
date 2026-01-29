@@ -70,7 +70,7 @@ inject_custom_css()
 
 # --- 4. Sidebar ---
 with st.sidebar:
-    st.image("""C:\Users\Lenovo\Ex.เว็บไอ\logowebtest.jpg""", width=60)
+    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=60)
     st.title("CoughCareKids")
     st.caption("by ice game bas")
     st.divider()
@@ -252,6 +252,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("🏠 กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
