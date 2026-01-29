@@ -70,7 +70,7 @@ inject_custom_css()
 
 # --- 4. Sidebar ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=60)
+    st.image("https://lh3.googleusercontent.com/gg-dl/AOI_d_9jehCqcQaPdIAmYjRKlElHdUA98mI-iVUTKgozlDdP0_rY4UfHa5DCoYEJNE97NUQthNtuFoNL1yfAWDBMJl74WDeuD0wbN6OhyMsQ1M4aw74fTRnV6IdqV1vh93KmUQJkLhLiolu7v1ZysyotZcKoG-XSptZB0PWx3Mbo-7bQVKlZ-g=s1024-rj", width=60)
     st.title("CoughCareKids")
     st.caption("by ice game bas")
     st.divider()
@@ -252,6 +252,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("🏠 กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
