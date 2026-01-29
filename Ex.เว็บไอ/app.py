@@ -81,7 +81,7 @@ def inject_custom_css(dark_mode):
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=60)
     st.title("Smart Cough AI")
-    st.caption("v1.0.0 (Prototype)")
+    st.caption("v1.0.1 (Production)")
     
     st.divider()
     
@@ -102,6 +102,7 @@ with st.sidebar:
 def mock_prediction(symptoms):
     # Logic เดิม
     scores = {"RSV": 10, "Whooping Cough": 10, "Pneumonia": 10}
+    if "หายใจเสียงหวีด (Wheezing)" in symptoms: scores["RSV"] += 40
     if "มีไข้ต่ำๆ" in symptoms: scores["RSV"] += 20
     if "น้ำมูกไหล/จาม" in symptoms: scores["RSV"] += 20
     if "ไอเป็นชุดยาวๆ หน้าดำหน้าแดง" in symptoms: scores["Whooping Cough"] += 50
@@ -157,8 +158,6 @@ elif st.session_state.page == 2:
     st.markdown('<div class="css-card">', unsafe_allow_html=True)
     st.subheader("🎙️ ขั้นตอนที่ 1: วิเคราะห์เสียงไอ")
     st.caption("ระบบ AI จะทำการแยกแยะลักษณะเสียงไอ (Dry/Wet) และรูปแบบความถี่เสียง")
-    
-    # พื้นที่จำลองกราฟเสียง (เพื่อความสวยงาม)
     st.markdown("---")
     
     # Audio Input
@@ -171,8 +170,14 @@ elif st.session_state.page == 2:
         
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
+            # ปุ่มนี้จะขึ้นก็ต่อเมื่ออัดเสียงแล้วเท่านั้น
             if st.button("วิเคราะห์เสียงและทำต่อ ➔", type="primary"):
-                next_page()        
+                next_page()
+    else:
+        # ถ้ายังไม่อัดเสียง จะขึ้นข้อความเตือน
+        st.info("💡 กรุณากดปุ่มไมโครโฟนสีแดงด้านบน เพื่อบันทึกเสียงไอก่อนดำเนินการต่อ")
+            
+    st.write("")
     st.button("🔙 ย้อนกลับ", on_click=prev_page)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -271,4 +276,3 @@ elif st.session_state.page == 4:
         st.button("🖨️ พิมพ์ผลลัพธ์ (Simulation)", disabled=True)
         
     st.markdown('</div>', unsafe_allow_html=True)
-
