@@ -136,62 +136,60 @@ if st.session_state.page == 1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# PAGE 2: Audio Recording (Fixed Red Circle)
+# PAGE 2: Audio Recording (Pure Mic Button)
 # ==========================================
 elif st.session_state.page == 2:
-    # --- CSS แก้ไขใหม่ (รับรองปุ่มไม่หาย) ---
+    # --- CSS: ซ่อนทุกอย่างยกเว้นปุ่มไมค์ ---
     st.markdown("""
     <style>
-        /* 1. ซ่อนทุกอย่างที่ไม่จำเป็นใน Widget อัดเสียง */
+        /* 1. จัดตำแหน่งปุ่มให้อยู่กึ่งกลาง */
         div[data-testid="stAudioInput"] {
-            background-color: transparent !important; /* พื้นหลังใส */
-            border: none !important;                 /* ลบขอบสี่เหลี่ยม */
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin: 20px auto !important;           /* จัดกึ่งกลาง */
+            margin: auto !important;
             width: fit-content !important;
-            min-height: 150px !important;            /* จองพื้นที่ความสูงไว้กันปุ่มหาย */
         }
 
-        /* 2. บังคับปุ่มกดข้างใน (ไม่ว่าจะอยู่ลึกแค่ไหน) ให้เป็นวงกลมแดง */
-        div[data-testid="stAudioInput"] button {
-            background-color: #FF4B4B !important;    /* สีแดงสด */
-            width: 160px !important;                 /* กว้าง */
-            height: 160px !important;                /* สูง */
-            border-radius: 50% !important;           /* วงกลม */
-            border: 4px solid white !important;      /* ขอบขาว */
-            box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            transition: transform 0.2s !important;
+        /* 2. ปรับปุ่มกด (Start/Stop) ให้เป็นวงกลมแดงใหญ่ */
+        div[data-testid="stAudioInput"] > button:first-child {
+            background-color: #FF4B4B !important;
+            width: 180px !important;
+            height: 180px !important;
+            border-radius: 50% !important;
+            border: 5px solid #FFEBEE !important;
+            box-shadow: 0 4px 20px rgba(255, 75, 75, 0.3) !important;
+        }
+        
+        /* เอฟเฟกต์ตอนชี้ */
+        div[data-testid="stAudioInput"] > button:first-child:hover {
+            transform: scale(1.05);
+            background-color: #D32F2F !important;
         }
 
-        /* เอฟเฟกต์ตอนชี้เมาส์ */
-        div[data-testid="stAudioInput"] button:hover {
-            transform: scale(1.05) !important;
-            background-color: #D32F2F !important;   /* แดงเข้มขึ้น */
-            box-shadow: 0 0 25px rgba(255, 75, 75, 0.6) !important;
-        }
-
-        /* 3. ขยายไอคอนไมโครโฟนให้ใหญ่และเป็นสีขาว */
-        div[data-testid="stAudioInput"] button svg {
-            width: 80px !important;
-            height: 80px !important;
+        /* 3. ขยายไอคอนไมค์ข้างใน */
+        div[data-testid="stAudioInput"] > button:first-child svg {
+            width: 70px !important;
+            height: 70px !important;
             fill: white !important;
         }
 
-        /* 4. ซ่อนข้อความ "Record" และตัวเลขเวลาเล็กๆ */
-        div[data-testid="stAudioInput"] label, 
-        div[data-testid="stAudioInput"] p {
+        /* --- 4. สำคัญ: ซ่อนปุ่มถังขยะ (Delete) --- */
+        div[data-testid="stAudioInput"] button[aria-label="Clear"],
+        div[data-testid="stAudioInput"] button[kind="secondary"] {
             display: none !important;
         }
 
-        /* 5. ซ่อนหน้าต่างเล่นเสียง (Player) ที่จะโผล่มาหลังอัดเสร็จ */
-        /* (เราจะซ่อนมันเพื่อให้เห็นแค่ผลลัพธ์ว่าเสร็จแล้ว) */
-        div[data-testid="stAudioInput"] > div:has(audio) {
+        /* --- 5. ซ่อนปุ่ม Download (ถ้ามี) และ Waveform --- */
+        /* ซ่อนเครื่องเล่นเสียงตัวเต็ม เพื่อไม่ให้มีปุ่ม Save/Download */
+        div[data-testid="stAudioInput"] audio {
+            display: none !important; 
+        }
+        
+        /* ซ่อน Canvas (คลื่นเสียง) */
+        div[data-testid="stAudioInput"] canvas {
             display: none !important;
         }
+
+        /* ซ่อนข้อความ Label */
+        div[data-testid="stAudioInput"] label { display: none !important; }
 
     </style>
     """, unsafe_allow_html=True)
@@ -200,7 +198,7 @@ elif st.session_state.page == 2:
     st.subheader("🎙️ วิเคราะห์เสียงไอ (Audio Analysis)")
     
     st.markdown(
-        "<h3 style='text-align: center; color: #555;'>แตะปุ่มสีแดงเพื่อเริ่มอัดเสียง</h3>", 
+        "<h3 style='text-align: center; color: #555;'>กดปุ่มสีแดงเพื่อเริ่ม/หยุด</h3>", 
         unsafe_allow_html=True
     )
     st.write("") 
@@ -208,29 +206,37 @@ elif st.session_state.page == 2:
     # --- ปุ่มอัดเสียง ---
     audio = st.audio_input("Record") 
     
-    # --- Logic การทำงาน ---
+    # --- Logic ---
     if audio:
-        # เมื่ออัดเสร็จ (ปุ่มจะหายไป หรือกลายเป็น Player ที่เราซ่อนไว้)
-        # เราจะแสดงข้อความและปุ่มไปต่อทันที
-        
+        # เมื่อได้ไฟล์เสียงแล้ว (กดหยุดแล้ว)
         st.write("")
-        # กล่องแจ้งเตือนสวยๆ แทนของเดิม
+        
+        # แสดงสถานะว่าได้รับเสียงแล้ว (แทนเครื่องเล่นเสียงที่ถูกซ่อนไป)
         st.markdown("""
-            <div style="background-color: #E8F5E9; padding: 20px; border-radius: 10px; text-align: center; color: #2E7D32; font-weight: bold; border: 1px solid #C8E6C9;">
-                ✅ บันทึกเสียงเรียบร้อยแล้ว
+            <div style="
+                background-color: #E8F5E9; 
+                padding: 15px; 
+                border-radius: 50px; 
+                text-align: center; 
+                color: #2E7D32; 
+                font-weight: bold; 
+                border: 2px solid #A5D6A7;
+                width: fit-content;
+                margin: 0 auto;">
+                ✅ ได้รับเสียงเรียบร้อย (Recorded)
             </div>
         """, unsafe_allow_html=True)
         
         st.write("")
+        st.write("")
         
-        # จัดปุ่มไปต่อให้อยู่ตรงกลาง
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("กดเพื่อวิเคราะห์อาการต่อ ➔", type="primary"):
+        # ปุ่มไปต่อ
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            if st.button("วิเคราะห์ผลทันที ➔", type="primary"):
                 next_page()
-    
     else:
-        # ดันพื้นที่ว่างด้านล่าง
+        # พื้นที่ว่าง
         st.write("<br><br>", unsafe_allow_html=True)
 
     st.write("")
@@ -318,6 +324,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
