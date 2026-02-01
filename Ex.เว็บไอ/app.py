@@ -117,7 +117,7 @@ def reset():
 if st.session_state.page == 1:
     st.markdown('<div class="css-card">', unsafe_allow_html=True)
     st.title("Cough Care Kids")
-    st.markdown("### ระบบคัดกรองโรคทางเดินหายใจในเด็กเบื้องต้น\n\ระบบคัดกรองโรคทาเดินหายใจในเด็กแรกเกิดถึงเด็กอายุ5ปี")
+    st.markdown("### ระบบคัดกรองโรคทางเดินหายใจในเด็กเบื้องต้น\nระบบคัดกรองโรคทาเดินหายใจในเด็กแรกเกิดถึงเด็กอายุ5ปี")
     st.write("---")
     c1, c2 = st.columns([1, 1])
     with c1:
@@ -247,5 +247,6 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
