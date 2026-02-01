@@ -136,42 +136,57 @@ if st.session_state.page == 1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# PAGE 2: Audio Recording (Big Circle Button)
+# PAGE 2: Audio Recording (Fully Clickable Circle)
 # ==========================================
 elif st.session_state.page == 2:
-    # --- CSS เฉพาะหน้านี้: บังคับให้ปุ่มอัดเสียงเป็นวงกลมใหญ่ ---
+    # --- CSS แก้ไขปุ่มกดให้เป็นวงกลมใหญ่ที่กดได้จริงทั้งลูก ---
     st.markdown("""
     <style>
-        /* ปรับแต่งตัว Container ของปุ่มอัดเสียงให้เป็นวงกลม */
+        /* 1. จัดตำแหน่งกล่องให้อยู่กึ่งกลาง */
         div[data-testid="stAudioInput"] {
-            width: 200px !important;       /* ความกว้าง */
-            height: 200px !important;      /* ความสูงเท่ากันให้เป็นจัตุรัสก่อน */
-            border-radius: 50% !important; /* ทำเป็นวงกลม */
+            justify-content: center !important;
+            margin-top: 20px;
+        }
+
+        /* 2. ขยาย "ตัวปุ่มกด" (Button) ให้เป็นวงกลมยักษ์ */
+        div[data-testid="stAudioInput"] button {
+            width: 200px !important;        /* กว้าง 200px */
+            height: 200px !important;       /* สูง 200px */
+            border-radius: 50% !important;  /* ทำเป็นวงกลม */
             background-color: #FFEBEE !important; /* พื้นหลังสีแดงจางๆ */
-            border: 4px solid #FF4B4B !important; /* ขอบสีแดง */
-            margin: 0 auto !important;     /* จัดกึ่งกลาง */
+            border: 4px solid #FF4B4B !important; /* ขอบสีแดงเข้ม */
+            
+            /* จัดไอคอนข้างในให้อยู่ตรงกลาง */
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            box-shadow: 0 0 20px rgba(255, 75, 75, 0.2) !important;
+            padding: 0 !important;
+            
+            /* เพิ่มเงาให้ดูมีมิติ */
+            box-shadow: 0 4px 20px rgba(255, 75, 75, 0.3) !important;
+            transition: all 0.2s ease-in-out !important;
         }
 
-        /* เอฟเฟกต์ตอนเอาเมาส์ชี้ */
-        div[data-testid="stAudioInput"]:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(255, 75, 75, 0.5) !important;
-            cursor: pointer;
+        /* 3. เมื่อเอาเมาส์ชี้ หรือแตะ */
+        div[data-testid="stAudioInput"] button:hover {
+            transform: scale(1.05) !important; /* ขยายใหญ่นิดนึง */
+            background-color: #FFCDD2 !important; /* สีเข้มขึ้น */
+            box-shadow: 0 0 40px rgba(255, 75, 75, 0.5) !important; /* เงาฟุ้งๆ */
+            border-color: #D50000 !important;
         }
 
-        /* ซ่อนข้อความ Label เล็กๆ ข้างบน (ถ้ามี) ให้ดูสะอาด */
+        /* 4. ขยายไอคอนไมค์ข้างในให้ใหญ่ตาม */
+        div[data-testid="stAudioInput"] button svg {
+            width: 60px !important;
+            height: 60px !important;
+            fill: #D50000 !important; /* สีไอคอน */
+        }
+        
+        /* ซ่อนข้อความ Label เล็กๆ เพื่อความสะอาดตา */
         div[data-testid="stAudioInput"] label {
             display: none;
         }
-        
-        /* จัดตำแหน่งปุ่มภายใน */
-        div[data-testid="stAudioInput"] > div {
-            justify-content: center;
-        }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -180,33 +195,29 @@ elif st.session_state.page == 2:
     
     # คำอธิบาย
     st.markdown(
-        "<h3 style='text-align: center; color: #FF4B4B;'>กดปุ่มวงกลมเพื่อเริ่มอัดเสียง</h3>", 
+        "<h3 style='text-align: center; color: #FF4B4B;'>แตะที่วงกลมเพื่อเริ่มอัดเสียง</h3>", 
         unsafe_allow_html=True
     )
     st.caption("<center>บันทึกเสียงไอประมาณ 3-5 วินาที</center>", unsafe_allow_html=True)
     
-    st.write("") # เว้นบรรทัด
-    
-    # --- ปุ่มอัดเสียง (CSS ด้านบนจะเปลี่ยนมันเป็นวงกลมใหญ่) ---
+    # --- ปุ่มอัดเสียง (ด้วย CSS ใหม่ พื้นที่ทั้งหมดคือกดได้) ---
     audio = st.audio_input("Record") 
-    
-    st.write("") # เว้นบรรทัด
     
     # --- แสดงผลเมื่ออัดเสร็จ ---
     if audio:
+        st.write("")
         st.success("✅ บันทึกเสียงเรียบร้อย (Audio Recorded)")
-        st.audio(audio) # แสดงตัวเล่นเสียงเผื่ออยากฟังทวน
+        st.audio(audio) # แสดงตัวเล่นเสียง
         
         st.write("---")
         
-        # ปุ่มไปต่อ (จะโผล่มาเฉพาะตอนอัดเสร็จแล้ว)
+        # ปุ่มไปต่อ
         col_next1, col_next2, col_next3 = st.columns([1, 2, 1])
         with col_next2:
             if st.button("ดำเนินการต่อ (Next Step) ➔", type="primary"):
                 next_page()
-    
     else:
-        # ถ้ายังไม่อัดเสียง ให้แสดงพื้นที่ว่างๆ ดันปุ่มย้อนกลับลงไป
+        # ดันพื้นที่ด้านล่าง
         st.write("<br>", unsafe_allow_html=True)
 
     st.write("")
@@ -292,6 +303,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
