@@ -3,7 +3,7 @@ import time
 
 # --- 1. ตั้งค่าหน้าเว็บ (Page Config) ---
 st.set_page_config(
-    page_title="Smart Cough Screening",
+    page_title="CoughCareKids",
     page_icon="🩺",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -73,7 +73,7 @@ inject_custom_css()
 # --- 4. Sidebar ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=60)
-    st.title("Smart Cough AI")
+    st.title("CoughCareKids")
     st.caption("v1.0.4 (Professional)")
     st.divider()
     
@@ -131,7 +131,7 @@ if st.session_state.page == 1:
     with c2:
         st.warning("**⚠️ คำเตือน**\n\nผลลัพธ์นี้เป็นเพียงการวิเคราะห์เบื้องต้นจากปัญญาประดิษฐ์ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้")
         st.write("")
-        if st.button("ยอมรับเงื่อนไขและเริ่มต้นใช้งาน ➔", type="primary"):
+        if st.button("ยอมรับเงื่อนไขและเริ่มต้นใช้งาน", type="primary"):
             next_page()
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -180,14 +180,14 @@ elif st.session_state.page == 3:
     col1, col2 = st.columns(2)
     
     with col1:
-        s1 = st.checkbox("มีไข้ต่ำๆ (Low-grade fever)")
-        s2 = st.checkbox("มีไข้สูง หนาวสั่น (High fever & Chills)")
-        s3 = st.checkbox("น้ำมูกไหล / จาม (Runny nose)")
+        s1 = st.checkbox("มีไข้ต่ำๆ)")
+        s2 = st.checkbox("มีไข้สูง หนาวสั่น)")
+        s3 = st.checkbox("น้ำมูกไหล / จาม")
         
     with col2:
-        s4 = st.checkbox("เจ็บหน้าอกเวลาหายใจ (Chest pain)")
-        s5 = st.checkbox("มีเสมหะสีเขียวหรือคล้ำ (Phlegm)")
-        s6 = st.checkbox("อาเจียนหลังไอ (Post-tussive vomiting)")
+        s4 = st.checkbox("เจ็บหน้าอกเวลาหายใจ")
+        s5 = st.checkbox("มีเสมหะสีเขียวหรือคล้ำ")
+        s6 = st.checkbox("อาเจียนหลังไอ")
 
     # รวบรวมอาการ
     current_symptoms = []
@@ -205,7 +205,7 @@ elif st.session_state.page == 3:
     st.session_state.duration = st.slider("จำนวนวัน (Days)", 1, 30, 3)
     
     c1, c2 = st.columns([1, 1])
-    with c1: st.button("🔙 ย้อนกลับ", on_click=prev_page)
+    with c1: st.button("ย้อนกลับ", on_click=prev_page)
     with c2: st.button("ประมวลผลการวินิจฉัย 🔍", on_click=next_page, type="primary")
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -245,7 +245,7 @@ elif st.session_state.page == 4:
 
     st.write("---")
     c1, c2 = st.columns(2)
-    with c1: st.button("🏠 กลับหน้าหลัก", on_click=reset)
-    with c2: st.button("🖨️ พิมพ์ผลลัพธ์ (Simulation)", disabled=True)
+    with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
