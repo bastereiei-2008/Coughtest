@@ -250,7 +250,7 @@ elif st.session_state.page == 2:
 elif st.session_state.page == 3:
     st.markdown('<div class="css-card">', unsafe_allow_html=True)
     st.subheader("ประเมินอาการร่วมด้วย")
-    st.write("กรุณาเลือกอาการร่วมด้วย")
+    st.write("กรุณาเลือกอาการร่วมด้วยและระยะเวลา")
     
     st.markdown("---")
     
@@ -324,6 +324,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
