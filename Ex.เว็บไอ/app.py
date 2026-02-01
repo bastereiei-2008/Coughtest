@@ -195,10 +195,10 @@ elif st.session_state.page == 2:
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="css-card">', unsafe_allow_html=True)
-    st.subheader("🎙️ วิเคราะห์เสียงไอ (Audio Analysis)")
+    st.subheader("🎙️วิเคราะห์เสียงไอ")
     
     st.markdown(
-        "<h3 style='text-align: center; color: #555;'>กดปุ่มสีแดงเพื่อเริ่ม/หยุด</h3>", 
+        "<h3 style='text-align: center; color: #555;'>กดปุ่มเพื่อเริ่ม/หยุด</h3>", 
         unsafe_allow_html=True
     )
     st.write("") 
@@ -223,7 +223,7 @@ elif st.session_state.page == 2:
                 border: 2px solid #A5D6A7;
                 width: fit-content;
                 margin: 0 auto;">
-                ✅ ได้รับเสียงเรียบร้อย (Recorded)
+                ✅ ได้รับเสียงเรียบร้อย
             </div>
         """, unsafe_allow_html=True)
         
@@ -233,14 +233,14 @@ elif st.session_state.page == 2:
         # ปุ่มไปต่อ
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
-            if st.button("วิเคราะห์ผลทันที ➔", type="primary"):
+            if st.button("ถัดไป", type="primary"):
                 next_page()
     else:
         # พื้นที่ว่าง
         st.write("<br><br>", unsafe_allow_html=True)
 
     st.write("")
-    if st.button("🔙 ย้อนกลับ", key="back_btn"):
+    if st.button("ย้อนกลับ", key="back_btn"):
         prev_page()
         
     st.markdown('</div>', unsafe_allow_html=True)
@@ -249,7 +249,7 @@ elif st.session_state.page == 2:
 # ==========================================
 elif st.session_state.page == 3:
     st.markdown('<div class="css-card">', unsafe_allow_html=True)
-    st.subheader("📝 ขั้นตอนที่ 2: ประเมินอาการร่วม (Symptoms Assessment)")
+    st.subheader("📝 ขั้นตอนที่ 2: ประเมินอาการร่วม")
     st.write("กรุณาเลือกอาการที่ปรากฏในปัจจุบัน (Select all that apply)")
     
     st.markdown("---")
@@ -283,7 +283,7 @@ elif st.session_state.page == 3:
     
     c1, c2 = st.columns([1, 1])
     with c1: st.button("ย้อนกลับ", on_click=prev_page)
-    with c2: st.button("ประมวลผลการวินิจฉัย 🔍", on_click=next_page, type="primary")
+    with c2: st.button("วิเคราะห์", on_click=next_page, type="primary")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
@@ -324,6 +324,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
