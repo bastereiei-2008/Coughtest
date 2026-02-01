@@ -257,8 +257,8 @@ elif st.session_state.page == 3:
     col1, col2 = st.columns(2)
     
     with col1:
-        s1 = st.checkbox("มีไข้ต่ำๆ)")
-        s2 = st.checkbox("มีไข้สูง หนาวสั่น)")
+        s1 = st.checkbox("มีไข้ต่ำๆ")
+        s2 = st.checkbox("มีไข้สูง หนาวสั่น")
         s3 = st.checkbox("น้ำมูกไหล / จาม")
         
     with col2:
@@ -312,7 +312,7 @@ elif st.session_state.page == 4:
             st.write("- โรคนี้สามารถแพร่กระจายเชื้อได้ง่าย ควรแยกผู้ป่วยจากผู้อื่น")
             st.write("- ควรปรึกษาแพทย์เพื่อพิจารณาการใช้ยาปฏิชีวนะ")
         else: 
-            st.error("⚠️ **ข้อควรระวัง:** โรคปอดบวมเป็นภาวะที่ควรได้รับการดูแลจากแพทย์ โปรดเข้ารับการตรวจวินิจฉัยอย่างละเอียดที่โรงพยาบาล")
+            st.error("⚠️ **ข้อควรระวัง:** ผลลัพธ์นี้เป็นเพียงการวิเคราะห์เบื้องต้นจากปัญญาประดิษฐ์ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้")
 
     with col_res2:
         st.markdown("**AI Confidence Score**")
@@ -324,6 +324,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
