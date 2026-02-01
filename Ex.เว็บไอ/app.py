@@ -249,8 +249,8 @@ elif st.session_state.page == 2:
 # ==========================================
 elif st.session_state.page == 3:
     st.markdown('<div class="css-card">', unsafe_allow_html=True)
-    st.subheader("📝 ขั้นตอนที่ 2: ประเมินอาการร่วม")
-    st.write("กรุณาเลือกอาการที่ปรากฏในปัจจุบัน (Select all that apply)")
+    st.subheader("ประเมินอาการร่วมด้วย")
+    st.write("กรุณาเลือกอาการร่วมด้วย")
     
     st.markdown("---")
     
@@ -278,7 +278,7 @@ elif st.session_state.page == 3:
     st.session_state.symptoms = current_symptoms
 
     st.write("---")
-    st.markdown("**ระยะเวลาที่มีอาการ (Duration of Symptoms)**")
+    st.markdown("**ระยะเวลาที่มีอาการ**")
     st.session_state.duration = st.slider("จำนวนวัน (Days)", 1, 30, 3)
     
     c1, c2 = st.columns([1, 1])
@@ -324,6 +324,7 @@ elif st.session_state.page == 4:
     c1, c2 = st.columns(2)
     with c1: st.button("กลับหน้าหลัก", on_click=reset)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
